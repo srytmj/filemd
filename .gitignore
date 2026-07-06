@@ -1,0 +1,11 @@
+
+# Logs
+logs/
+
+# Deploy & update configs
+.deploy.conf
+.update.conf
+
+# Backend env
+backend/.env
+backend/.env.backup.*

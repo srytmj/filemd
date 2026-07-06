@@ -11,7 +11,23 @@ Files are deleted immediately after conversion. No database. No auth.
 /
   frontend/   React + Vite + TypeScript + Tailwind
   backend/    Laravel 11 API only
+  scripts/    deploy.sh, update.sh
+  docs/       PRD, SRS, tickets, structure
+  logs/       sync and deploy logs (gitignored)
 ```
+
+---
+
+<!-- STACK_START -->
+## Stack (auto-synced from SRS.md)
+
+- Frontend: React 18 + Vite + TypeScript + Tailwind CSS v4
+- Backend: Laravel 11 (API only)
+- PDF: smalot/pdfparser
+- DOCX: phpoffice/phpword
+- XLSX / PPTX: phpoffice/phpspreadsheet, phpoffice/phppresentation
+- Hosting: EC2 / Linux VM
+<!-- STACK_END -->
 
 ---
 
@@ -33,14 +49,6 @@ cd backend
 composer install
 php artisan serve
 php artisan test
-```
-
-### Required Packages
-
-```bash
-composer require smalot/pdfparser
-composer require phpoffice/phpword
-composer require phpoffice/phpspreadsheet
 ```
 
 ### File Lifecycle Rule
@@ -99,8 +107,8 @@ Error:
 - `app/Services/Converters/PptxConverter.php`
 - `app/Services/Converters/CsvConverter.php`
 - `app/Services/Converters/PlainTextConverter.php`
-- `app/Services/ConverterFactory.php` - resolves converter by MIME type
-- `app/Services/ConvertService.php` - orchestrates, calls factory
+- `app/Services/ConverterFactory.php` — resolves converter by MIME type
+- `app/Services/ConvertService.php` — orchestrates, calls factory
 
 Each converter implements:
 ```php
@@ -150,23 +158,6 @@ src/
   main.tsx
 ```
 
-### Types
-
-```typescript
-type FileStatus = 'queued' | 'uploading' | 'done' | 'error';
-
-type ConvertFile = {
-  id: string;
-  file: File;
-  status: FileStatus;
-  error?: string;
-};
-
-type ConvertResult =
-  | { type: 'single'; filename: string; markdown: string }
-  | { type: 'multiple'; files: { filename: string; markdown: string }[] };
-```
-
 ### Behavior Rules
 
 - Single file result: show `MarkdownOutput` inline with copy button.
@@ -174,18 +165,6 @@ type ConvertResult =
 - Combined file format: each section prefixed with `# filename.ext`, separated by `---`.
 - Validation errors shown per file, do not block valid files.
 - After result shown, allow user to reset and upload again.
-
-### API Call
-
-```typescript
-const formData = new FormData();
-files.forEach(f => formData.append('files[]', f.file));
-
-const res = await fetch(`${import.meta.env.VITE_API_URL}/api/convert`, {
-  method: 'POST',
-  body: formData,
-});
-```
 
 ---
 
@@ -200,8 +179,25 @@ const res = await fetch(`${import.meta.env.VITE_API_URL}/api/convert`, {
 - Do not use any CSS framework other than Tailwind.
 - Do not add `console.log` in production code.
 
+---
+
 ## Code Style
 
 - Laravel: PSR-12, type hints on all methods, no `var_dump`.
 - React: functional components only, explicit return types on hooks.
 - Commit messages: conventional commits (`feat:`, `fix:`, `chore:`).
+
+---
+
+## Deployment
+
+- Hosting: EC2 / Linux VM (not Azure — student plan limitations).
+- First deploy: `make deploy` → `sudo bash scripts/deploy.sh`
+- Updates: `make update` → `bash scripts/update.sh` (git pull + rebuild backend + rebuild frontend)
+- No CI/CD yet — see [docs/TODO.md](../docs/TODO.md).
+
+---
+
+## TODO
+
+See [docs/TODO.md](../docs/TODO.md).
